@@ -100,6 +100,33 @@ void setup()
 
 void loop()
 {
-  myGLCD.fillRect(x_center - 100, y_center -100, x_center + 100, y_center + 100);
+
+    while (ISPRESSED() == true) {
+      Serial.println("Down");
+        if (ISPRESSED() == false) {
+          Serial.println("Up");
+          switch(color) {
+
+            case RED :
+                myGLCD.setColor(255, 0, 0);
+                Serial.println("Change to Red");
+                color = GREEN;
+                break;
+  
+            case BLUE :
+                myGLCD.setColor(0, 0, 255);
+                Serial.println("Change to BLUE");
+                color = RED;
+                break;
+        
+            case GREEN :
+                myGLCD.setColor(0, 255, 0);
+                Serial.println("Change to Green");
+                color = BLUE;
+                break;
+          }
+          myGLCD.fillRect(x_center - 100, y_center -100, x_center + 100, y_center + 100);
+        }
+      }
   myGLCD.fillRect(x_center - 100, y_center -100, x_center + 100, y_center + 100);
 }
