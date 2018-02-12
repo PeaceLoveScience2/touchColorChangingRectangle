@@ -1,0 +1,105 @@
+#define TOUCH_ORIENTATION  LANDSCAPE
+#define USE_UTOUCH         0
+
+#if !(USE_UTOUCH)
+#define TITLE "TouchScreen.h Calibration"
+#include <Adafruit_GFX.h>
+#include <UTFTGLUE.h>            //we are using UTFT display methods
+UTFTGLUE myGLCD(0x9341, A2, A1, A3, A4, A0);
+
+#include <TouchScreen.h>
+
+// MCUFRIEND UNO shield shares pins with the TFT.   Due does NOT work
+#define YP A1   //A3 for ILI9320
+#define YM 7    //9
+#define XM A2
+#define XP 6    //8  
+
+TouchScreen myTouch(XP, YP, XM, YM, 300);
+TSPoint tp;                      //Touchscreen_due branch uses Point
+
+#define RED 0
+#define GREEN 1
+#define BLUE 2
+int color = RED; 
+
+void readResistiveTouch(void)
+{
+    tp = myTouch.getPoint();
+    pinMode(YP, OUTPUT);      //restore shared pins
+    pinMode(XM, OUTPUT);
+    digitalWrite(YP, HIGH);
+    digitalWrite(XM, HIGH);
+}
+
+bool ISPRESSED(void)
+{
+    readResistiveTouch();
+    return tp.z > 20 && tp.z < 1000;
+}
+
+void showpoint(void)
+{
+    Serial.print("\r\nx="); Serial.print(tp.x);
+    Serial.print(" y="); Serial.print(tp.y);
+    Serial.print(" z="); Serial.print(tp.z);
+}
+#else
+#define TITLE "UTouch.h Calibration"
+#include <SPI.h>
+#include <UTFT.h>
+#include <UTouch.h>
+UTFT    myGLCD(ILI9486, 38, 39, 40, 41);
+UTouch  myTouch( 6, 5, 4, 3, 2);
+
+#define ISPRESSED() myTouch.dataAvailable()
+extern void fail();
+
+#endif
+
+// ************************************
+// DO NOT EDIT ANYTHING BELOW THIS LINE
+// ************************************
+
+// Declare which fonts we will be using
+extern uint8_t SmallFont[];
+
+uint32_t cx, cy;
+uint32_t rx[8], ry[8];
+int32_t clx, crx, cty, cby;
+float px, py;
+int dispx, dispy, y_center, x_center, swapxy;
+uint32_t calx, caly, cals;
+char buf[13];
+
+void setup()
+{
+    Serial.begin(9600);
+    Serial.println("UTouch_Calibr_kbv");
+    digitalWrite(A0, HIGH);
+    pinMode(A0, OUTPUT);
+    myGLCD.InitLCD(TOUCH_ORIENTATION);
+    myGLCD.clrScr();
+    myGLCD.setFont(SmallFont);
+#if (USE_UTOUCH)
+    myTouch.InitTouch(TOUCH_ORIENTATION);
+#endif
+    dispx = myGLCD.getDisplayXSize();
+    dispy = myGLCD.getDisplayYSize();
+    y_center = (dispy / 2);
+    x_center = (dispx / 2);
+    Serial.println(y_center); 
+    Serial.println(x_center);
+    Serial.println(dispx); 
+    Serial.println(dispy);
+
+    myGLCD.setColor(255, 0, 0);
+    myGLCD.fillRect(x_center - 100, y_center -100, x_center + 100, y_center + 100);
+}
+
+
+void loop()
+{
+  myGLCD.fillRect(x_center - 100, y_center -100, x_center + 100, y_center + 100);
+  myGLCD.fillRect(x_center - 100, y_center -100, x_center + 100, y_center + 100);
+}
